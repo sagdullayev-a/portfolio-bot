@@ -27,6 +27,8 @@ export const env = {
   BOT_TOKEN: required('TELEGRAM_BOT_TOKEN'),
   /** Admin chat id that receives private notifications. */
   ADMIN_CHAT_ID: required('TELEGRAM_ADMIN_CHAT_ID'),
+  /** Portfolio website URL. */
+  PORTFOLIO_WEBSITE_URL: required('PORTFOLIO_WEBSITE_URL'),
   /** Runtime mode. */
   NODE_ENV: optional('NODE_ENV', 'development'),
 } as const;

@@ -1,4 +1,17 @@
-// Placeholder — implemented in Phase 2.
-// This file will export a single `registerCommands(bot: Telegraf)` function
-// that is the ONLY place to touch when adding a new command.
-export {};
+import { Telegraf, Context } from 'telegraf';
+import { registerStartCommand } from './start';
+import { registerAboutMeCommand } from './aboutMe';
+import { registerCvWebsiteCommand } from './cvWebsite';
+
+/**
+ * Registers all user-facing bot commands.
+ *
+ * NOTE: This is the ONLY place that needs to change when a new command is added later.
+ * 1. Create a new command file in src/commands/.
+ * 2. Import it here and call its register function inside registerCommands.
+ */
+export function registerCommands(bot: Telegraf<Context>) {
+  registerStartCommand(bot);
+  registerAboutMeCommand(bot);
+  registerCvWebsiteCommand(bot);
+}
