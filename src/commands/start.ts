@@ -10,7 +10,7 @@ export function registerStartCommand(bot: Telegraf<Context>) {
       `Mening shaxsiy portfolio botimga xush kelibsiz.\n\n` +
       `Quyidagi buyruqlar orqali men haqimda ma'lumot olishingiz mumkin:\n` +
       `👤 /about_me — Men haqimda\n` +
-      `🌐 /cv_website — Mening rezyume va portfolio veb-saytim`;
+      `🌐 /sagdullayevuz — Mening rezyume va portfolio veb-saytim`;
       
     await ctx.reply(welcomeMessage);
   });
