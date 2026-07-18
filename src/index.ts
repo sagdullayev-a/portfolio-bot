@@ -1,11 +1,16 @@
 import { bot } from './bot';
+import { startServer } from './server';
 
 /**
- * Entry point — starts the bot in long-polling mode.
+ * Entry point — starts both the Telegraf long-polling bot and the Express
+ * HTTP server in the same process.
  *
  * Handles startup error logging and graceful shutdown on SIGINT/SIGTERM.
  */
 console.log('[bot] Starting Telegram bot...');
+
+// Start the HTTP notify server (runs independently alongside polling)
+startServer();
 
 bot.launch()
   .then(() => {
