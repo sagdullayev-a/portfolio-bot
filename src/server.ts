@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { notifyAdmin } from './services/notifier';
+import { generateAiReply, ChatHistoryItem } from './services/aiChat';
 import { env } from './config/env';
 
 const app = express();
@@ -90,6 +91,48 @@ app.post('/notify/contact', contactLimiter, async (req, res) => {
   } catch (err) {
     console.error('[server] notifyAdmin failed:', err);
     return res.status(500).json({ error: 'Failed to send notification.' });
+  }
+});
+
+// ── Rate limiting for AI Chat ─────────────────────────────────────────────────
+// Max 10 AI chat requests per minute per IP (protecting free tier limits)
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many chat requests — please wait a minute and try again.' },
+});
+
+// ── POST /chat ───────────────────────────────────────────────────────────────
+app.post('/chat', chatLimiter, async (req, res) => {
+  const { message, history } = req.body as Record<string, unknown>;
+
+  if (!message || typeof message !== 'string' || message.trim().length === 0) {
+    return res.status(400).json({ error: 'Invalid message: "message" field is required.' });
+  }
+
+  if (message.length > 1000) {
+    return res.status(400).json({ error: 'Message too long (max 1000 characters).' });
+  }
+
+  try {
+    const userMsg = message.trim();
+    const reply = await generateAiReply(userMsg, history as ChatHistoryItem[]);
+    return res.status(200).json({ reply });
+  } catch (err: any) {
+    if (err?.message === 'GEMINI_API_KEY_MISSING') {
+      return res.status(503).json({ error: 'AI chat service is not configured yet.' });
+    }
+    if (err?.message === 'DAILY_QUOTA_EXCEEDED') {
+      return res.status(429).json({ error: 'AI chat is temporarily unavailable, please try the quick questions instead.' });
+    }
+    if (err?.status === 429 || String(err?.message).includes('429')) {
+      return res.status(429).json({ error: 'AI is temporarily rate limited by Google. Please try again in a few seconds.' });
+    }
+
+    console.error('[server] Gemini chat failed:', err);
+    return res.status(500).json({ error: 'AI is temporarily unavailable, please try again.' });
   }
 });
 

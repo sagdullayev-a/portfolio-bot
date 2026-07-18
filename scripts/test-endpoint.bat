@@ -23,6 +23,16 @@ curl -s -X POST http://localhost:3001/notify/contact ^
   -w "\nHTTP Status: %%{http_code}\n"
 
 echo.
-echo === TEST 4: Health check ===
+echo.
+echo === TEST 4: Chat endpoint test ===
+curl -s -X POST http://localhost:3001/chat ^
+  -H "Content-Type: application/json" ^
+  -H "Origin: http://localhost:8080" ^
+  -d "{\"message\":\"Siz qaysi texnologiyalardan foydalanasiz?\"}" ^
+  -w "\nHTTP Status: %%{http_code}\n"
+
+echo.
+echo === TEST 5: Health check ===
 curl -s http://localhost:3001/health -w "\nHTTP Status: %%{http_code}\n"
+
 

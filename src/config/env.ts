@@ -27,4 +27,5 @@ export const env = {
   ADMIN_CHAT_ID: required('TELEGRAM_ADMIN_CHAT_ID'),
   PORTFOLIO_WEBSITE_URL: required('PORTFOLIO_WEBSITE_URL'),
   NODE_ENV: required('NODE_ENV'),
+  GEMINI_API_KEY: optional('GEMINI_API_KEY', ''),
 } as const;
