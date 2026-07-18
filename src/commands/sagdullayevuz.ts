@@ -6,11 +6,11 @@ import { env } from '../config/env';
  */
 export function registerSagdullayevUzCommand(bot: Telegraf<Context>) {
   bot.command('sagdullayevuz', async (ctx) => {
-    const websiteMessage = 
+    const websiteMessage =
       `🌐 *Rezyume va Portfolio Veb-saytim*\n\n` +
       `Mening to'liq rezyumem va bajargan loyihalarim bilan quyidagi havola orqali tanishishingiz mumkin:\n` +
       `👉 ${env.PORTFOLIO_WEBSITE_URL}`;
-      
+
     await ctx.reply(websiteMessage, { parse_mode: 'Markdown' });
   });
 }

@@ -7,7 +7,7 @@ async function test() {
     title: 'Test Notification from CLI',
     details: {
       name: 'Azizxon',
-      email: 'test@example.com',
+      email: 'azizhon.sagdullayev@gmail.com',
       message: 'This is a test notification to verify Phase 3 works correctly!',
     },
   });
