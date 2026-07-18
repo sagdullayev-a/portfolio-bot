@@ -51,7 +51,7 @@ const contactLimiter = rateLimit({
 
 // ── POST /notify/contact ──────────────────────────────────────────────────────
 app.post('/notify/contact', contactLimiter, async (req, res) => {
-  const { name, email, message } = req.body as Record<string, unknown>;
+  const { name, email, telegramUsername, phone, message } = req.body as Record<string, unknown>;
 
   // Basic type validation
   if (!name || !message || typeof name !== 'string' || typeof message !== 'string') {
@@ -65,16 +65,26 @@ app.post('/notify/contact', contactLimiter, async (req, res) => {
   if (email !== undefined && (typeof email !== 'string' || email.length > 200)) {
     return res.status(400).json({ error: 'Invalid email field.' });
   }
+  if (telegramUsername !== undefined && (typeof telegramUsername !== 'string' || telegramUsername.length > 100)) {
+    return res.status(400).json({ error: 'Invalid Telegram username field.' });
+  }
+  if (phone !== undefined && (typeof phone !== 'string' || phone.length > 50)) {
+    return res.status(400).json({ error: 'Invalid phone field.' });
+  }
 
   try {
+    const details: Record<string, string> = {
+      name: name.trim(),
+    };
+    if (typeof email === 'string' && email.trim()) details.email = email.trim();
+    if (typeof telegramUsername === 'string' && telegramUsername.trim()) details.telegramUsername = telegramUsername.trim();
+    if (typeof phone === 'string' && phone.trim()) details.phone = phone.trim();
+    details.message = message.trim();
+
     await notifyAdmin({
       type: 'contact_form',
       title: 'New contact form submission',
-      details: {
-        name,
-        email: typeof email === 'string' && email.trim() ? email.trim() : 'not provided',
-        message,
-      },
+      details,
     });
     return res.status(200).json({ success: true });
   } catch (err) {

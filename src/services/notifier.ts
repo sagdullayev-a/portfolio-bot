@@ -26,18 +26,39 @@ export async function notifyAdmin(options: NotifyOptions): Promise<void> {
       break;
   }
 
+  // Map common field keys to user-friendly display labels
+  const LABEL_MAP: Record<string, string> = {
+    name: 'Name',
+    email: 'Email',
+    telegramUsername: 'Telegram',
+    telegram_username: 'Telegram',
+    phone: 'Phone',
+    message: 'Message',
+  };
+
   // Build the markdown message
   let message = `${emoji} *${title}*\n\n`;
   
   // Format key-value pairs
   for (const [key, value] of Object.entries(details)) {
-    const formattedKey = key
-      .replace(/([_*\[`])/g, '\\$1') // simple escape for key names
-      .replace(/\b([a-z])/, (match) => match.toUpperCase()); // capitalize key
-    message += `*${formattedKey}:* ${value}\n`;
+    const label = LABEL_MAP[key] ?? key
+      .replace(/([_*\[`])/g, '\\$1')
+      .replace(/\b([a-z])/, (match) => match.toUpperCase());
+    const escapedValue = String(value).replace(/([_*\[`])/g, '\\$1');
+    message += `*${label}:* ${escapedValue}\n`;
   }
   
-  message += `\n_Vaqt (UTC):_ ${new Date().toISOString()}`;
+  const tashkentTime = new Date().toLocaleString('uz-UZ', {
+    timeZone: 'Asia/Tashkent',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
+  message += `\n_Vaqt:_ ${tashkentTime}`;
 
   try {
     await bot.telegram.sendMessage(env.ADMIN_CHAT_ID, message, {
