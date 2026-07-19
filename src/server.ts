@@ -61,37 +61,28 @@ const contactLimiter = rateLimit({
   message: { error: 'Too many requests — please wait a moment and try again.' },
 });
 
+import { validateContactForm } from './utils/validation';
+
 // ── POST /notify/contact ──────────────────────────────────────────────────────
 app.post('/notify/contact', contactLimiter, async (req, res) => {
-  const { name, email, telegramUsername, phone, message } = req.body as Record<string, unknown>;
+  const validation = validateContactForm((req.body ?? {}) as Record<string, unknown>);
 
-  // Basic type validation
-  if (!name || !message || typeof name !== 'string' || typeof message !== 'string') {
-    return res.status(400).json({ error: 'Invalid input: "name" and "message" are required strings.' });
-  }
-
-  // Length guards
-  if (name.length > 200 || message.length > 2000) {
-    return res.status(400).json({ error: 'Input too long.' });
-  }
-  if (email !== undefined && (typeof email !== 'string' || email.length > 200)) {
-    return res.status(400).json({ error: 'Invalid email field.' });
-  }
-  if (telegramUsername !== undefined && (typeof telegramUsername !== 'string' || telegramUsername.length > 100)) {
-    return res.status(400).json({ error: 'Invalid Telegram username field.' });
-  }
-  if (phone !== undefined && (typeof phone !== 'string' || phone.length > 50)) {
-    return res.status(400).json({ error: 'Invalid phone field.' });
+  if (!validation.isValid || !validation.normalizedData) {
+    return res.status(400).json({
+      success: false,
+      error: validation.error || "Forma ma'lumotlari noto'g'ri.",
+    });
   }
 
   try {
+    const { name, email, telegramUsername, phone, message } = validation.normalizedData;
     const details: Record<string, string> = {
-      name: name.trim(),
+      name,
+      message,
     };
-    if (typeof email === 'string' && email.trim()) details.email = email.trim();
-    if (typeof telegramUsername === 'string' && telegramUsername.trim()) details.telegramUsername = telegramUsername.trim();
-    if (typeof phone === 'string' && phone.trim()) details.phone = phone.trim();
-    details.message = message.trim();
+    if (email) details.email = email;
+    if (telegramUsername) details.telegramUsername = telegramUsername;
+    if (phone) details.phone = phone;
 
     await notifyAdmin({
       type: 'contact_form',
@@ -101,7 +92,7 @@ app.post('/notify/contact', contactLimiter, async (req, res) => {
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('[server] notifyAdmin failed:', err);
-    return res.status(500).json({ error: 'Failed to send notification.' });
+    return res.status(500).json({ success: false, error: 'Failed to send notification.' });
   }
 });
 
