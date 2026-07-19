@@ -25,10 +25,29 @@ export interface User {
   updatedAt: string;
 }
 
+export type ActionType =
+  | 'START'
+  | 'COMMAND'
+  | 'AI_CHAT'
+  | 'TEXT'
+  | 'PHOTO'
+  | 'VOICE'
+  | 'VIDEO'
+  | 'DOCUMENT'
+  | 'STICKER'
+  | 'CONTACT'
+  | 'LOCATION'
+  | 'CALLBACK'
+  | 'ERROR';
+
 export interface ActivityLog {
   id: string;
+  userId?: string;
   telegramId: number;
-  action: string;
+  action: ActionType;
   message?: string | null;
+  messageId?: number;
+  chatId?: number;
+  chatType?: string;
   createdAt: string;
 }
