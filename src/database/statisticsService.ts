@@ -180,6 +180,7 @@ export async function getActionStatistics(): Promise<ActionStatistics> {
     LOCATION: 0,
     CALLBACK: 0,
     ERROR: 0,
+    UNAUTHORIZED: 0,
   };
 
   for (const log of logs) {

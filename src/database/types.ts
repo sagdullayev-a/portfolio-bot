@@ -38,7 +38,8 @@ export type ActionType =
   | 'CONTACT'
   | 'LOCATION'
   | 'CALLBACK'
-  | 'ERROR';
+  | 'ERROR'
+  | 'UNAUTHORIZED';
 
 export interface ActivityLog {
   id: string;
