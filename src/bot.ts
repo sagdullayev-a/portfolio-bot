@@ -1,18 +1,20 @@
 import { Telegraf } from 'telegraf';
 import { env } from './config/env';
 import { loggerMiddleware } from './middlewares/logger';
+import { userTrackingMiddleware } from './middlewares/userTracking';
+import { activityLoggerMiddleware } from './middlewares/activityLogger';
 import { registerCommands } from './commands';
 
 /**
  * Central Telegraf instance for the bot service.
- *
- * Middleware, command registration, and the global error handler
- * are wired here in Phase 2.
+ * Wire logging, user tracking, activity logger middlewares, command registration, and global error handling.
  */
 export const bot = new Telegraf(env.BOT_TOKEN);
 
-// 1. Wire logging middleware
+// 1. Wire middlewares
 bot.use(loggerMiddleware);
+bot.use(userTrackingMiddleware);
+bot.use(activityLoggerMiddleware);
 
 // 2. Register commands
 registerCommands(bot);

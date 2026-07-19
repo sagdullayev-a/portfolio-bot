@@ -11,7 +11,7 @@ function escapeHtml(str: string): string {
 
 /**
  * Sends a structured notification to the configured administrator.
- * Contact form notifications are formatted in Uzbek with exact required layout.
+ * Contact form notifications use the compact sequential Telegram HTML layout.
  */
 export async function notifyAdmin(options: NotifyOptions): Promise<void> {
   const { type, title, details } = options;
@@ -34,25 +34,21 @@ export async function notifyAdmin(options: NotifyOptions): Promise<void> {
       second: '2-digit',
     });
 
-    const formattedMessage = `📩 <b>Yangi xabar keldi</b>
+    const emailFormatted = email !== 'Kiritilmagan' ? `<code>${escapeHtml(email)}</code>` : '<i>Kiritilmagan</i>';
+    const telegramFormatted = telegram !== 'Kiritilmagan' ? `<code>${escapeHtml(telegram)}</code>` : '<i>Kiritilmagan</i>';
+    const phoneFormatted = phone !== 'Kiritilmagan' ? `<code>${escapeHtml(phone)}</code>` : '<i>Kiritilmagan</i>';
 
-👤 <b>Ismi:</b>
-${escapeHtml(name)}
+    const formattedMessage = `🌐 <b>PORTFOLIO</b> • <b>Yangi Xabar</b>
+──────────────────────────
+👤 <b>Ismi:</b> <b>${escapeHtml(name)}</b>
+📧 <b>Email:</b> ${emailFormatted}
+💬 <b>Telegram:</b> ${telegramFormatted}
+📱 <b>Telefon:</b> ${phoneFormatted}
 
-📧 <b>Email:</b>
-${escapeHtml(email)}
+📝 <b>Xabar matni:</b>
+<blockquote>${escapeHtml(messageContent)}</blockquote>
 
-💬 <b>Telegram:</b>
-${escapeHtml(telegram)}
-
-📱 <b>Telefon:</b>
-${escapeHtml(phone)}
-
-📝 <b>Xabar:</b>
-${escapeHtml(messageContent)}
-
-🕒 <b>Yuborilgan vaqt:</b>
-${tashkentTime}`;
+📅 <i>Vaqt: ${tashkentTime}</i>`;
 
     try {
       await bot.telegram.sendMessage(env.ADMIN_CHAT_ID, formattedMessage, {
