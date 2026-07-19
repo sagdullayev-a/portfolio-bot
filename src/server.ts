@@ -95,14 +95,21 @@ app.post('/notify/contact', contactLimiter, async (req, res) => {
 });
 
 // ── Rate limiting for AI Chat ─────────────────────────────────────────────────
-// Max 10 AI chat requests per minute per IP (protecting free tier limits)
-const chatLimiter = rateLimit({
+// Active only in production to protect free tier quota; bypassed in development.
+const chatRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many chat requests — please wait a minute and try again.' },
 });
+
+const chatLimiter: express.RequestHandler = (req, res, next) => {
+  if (env.NODE_ENV === 'production') {
+    return chatRateLimiter(req, res, next);
+  }
+  return next();
+};
 
 // ── POST /chat ───────────────────────────────────────────────────────────────
 app.post('/chat', chatLimiter, async (req, res) => {
@@ -125,9 +132,11 @@ app.post('/chat', chatLimiter, async (req, res) => {
       return res.status(503).json({ error: 'AI chat service is not configured yet.' });
     }
     if (err?.message === 'DAILY_QUOTA_EXCEEDED') {
+      console.warn('[server] Our own daily quota ceiling was hit.');
       return res.status(429).json({ error: 'AI chat is temporarily unavailable, please try the quick questions instead.' });
     }
     if (err?.status === 429 || String(err?.message).includes('429')) {
+      console.warn('[server] Gemini rate-limited this request:', err?.message || err);
       return res.status(429).json({ error: 'AI is temporarily rate limited by Google. Please try again in a few seconds.' });
     }
 
@@ -166,6 +175,13 @@ export function startServer(): void {
     console.log(
       `[server] Allowed CORS origins: ${allowedOrigins.join(', ')}${
         env.NODE_ENV !== 'production' ? ' (+ http://localhost:* in dev mode)' : ''
+      }`,
+    );
+    console.log(
+      `[server] Chat rate limiting: ${
+        env.NODE_ENV === 'production'
+          ? '10 req/min (production)'
+          : 'DISABLED (development mode)'
       }`,
     );
   });

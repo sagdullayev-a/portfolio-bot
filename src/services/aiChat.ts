@@ -45,7 +45,7 @@ export async function generateAiReply(
   }
 
   const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-  const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 
   // Format history for Gemini SDK
   const formattedHistory = (rawHistory || [])
