@@ -8,8 +8,11 @@ import {
 import {
   renderUserProfileText,
   getUserProfileKeyboard,
-  TIMELINE_PLACEHOLDER,
 } from './adminUserProfile';
+import {
+  renderUserTimelineText,
+  getUserTimelineKeyboard,
+} from './adminTimeline';
 
 export const ADMIN_PLACEHOLDER_MESSAGE = '🚧 Bu modul keyingi phaseda quriladi.';
 
@@ -85,7 +88,7 @@ export function getAdminDashboardKeyboard() {
 }
 
 /**
- * Registers /admin command and callback query handlers for Dashboard, Users, and User Profile.
+ * Registers /admin command and callback query handlers for Dashboard, Users, User Profile, and Timeline.
  */
 export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
   // 1. /admin command - protected by adminAuthMiddleware
@@ -130,12 +133,45 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 4. User Timeline Callback: admin_user_timeline_<userId>
+  // 4. User Timeline Callbacks: admin_user_timeline_<userId> or admin_timeline_page_<userId>_<page>
   bot.action(/^admin_user_timeline_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
-      await ctx.answerCbQuery(TIMELINE_PLACEHOLDER, { show_alert: true });
+      const userId = ctx.match[1];
+      const { text, page, totalPages, userExists } = await renderUserTimelineText(userId, 1);
+
+      if (!userExists) {
+        await ctx.answerCbQuery('⚠️ User not found', { show_alert: true });
+        return;
+      }
+
+      await ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        ...getUserTimelineKeyboard(userId, page, totalPages),
+      });
+      await ctx.answerCbQuery();
     } catch (err) {
-      console.error('[adminUserProfile] Error answering timeline callback:', err);
+      console.error('[adminTimeline] Error rendering timeline:', err);
+    }
+  });
+
+  bot.action(/^admin_timeline_page_(.+)_(\d+)$/, adminAuthMiddleware, async (ctx) => {
+    try {
+      const userId = ctx.match[1];
+      const page = parseInt(ctx.match[2], 10);
+      const { text, page: currPage, totalPages, userExists } = await renderUserTimelineText(userId, page);
+
+      if (!userExists) {
+        await ctx.answerCbQuery('⚠️ User not found', { show_alert: true });
+        return;
+      }
+
+      await ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        ...getUserTimelineKeyboard(userId, currPage, totalPages),
+      });
+      await ctx.answerCbQuery();
+    } catch (err) {
+      console.error('[adminTimeline] Error rendering timeline page:', err);
     }
   });
 
