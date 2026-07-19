@@ -54,5 +54,19 @@
     "action": "UNAUTHORIZED",
     "message": "Attempted command/action: admin_settings",
     "createdAt": "2026-07-19T13:23:14.097Z"
+  },
+  {
+    "id": "7e323964-5e41-4371-bf80-95fe29e16b74",
+    "telegramId": 111999888,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_dashboard",
+    "createdAt": "2026-07-19T13:25:00.654Z"
+  },
+  {
+    "id": "0c2c196c-5451-420b-b54d-db7d64d7282f",
+    "telegramId": 111999888,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_dashboard",
+    "createdAt": "2026-07-19T13:25:23.688Z"
   }
 ]
