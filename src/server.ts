@@ -11,19 +11,19 @@ const app = express();
 app.use(express.json());
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-// Production: only the real portfolio domain.
-// Development: also allow the local Vite dev server.
-const allowedOrigins: string[] = [env.PORTFOLIO_WEBSITE_URL];
+const allowedOrigins: string[] = [
+  env.PORTFOLIO_WEBSITE_URL,
+  env.PORTFOLIO_WEBSITE_URL.replace('https://', 'https://www.'),
+];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server requests (no Origin header) only in development
+      // Allow requests with no origin (like health checks, direct pings, curl)
       if (!origin) {
-        if (env.NODE_ENV !== 'production') return callback(null, true);
-        return callback(new Error('Origin required in production'));
+        return callback(null, true);
       }
-      if (allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
       // Allow any localhost port in development
@@ -35,7 +35,7 @@ app.use(
       }
       return callback(new Error(`CORS: origin "${origin}" is not allowed`));
     },
-    methods: ['POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type'],
   }),
 );
