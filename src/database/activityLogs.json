@@ -33,5 +33,12 @@
     "action": "UNAUTHORIZED",
     "message": "Attempted command/action: admin_search",
     "createdAt": "2026-07-19T12:54:55.383Z"
+  },
+  {
+    "id": "2bbb27bc-28ea-484e-a266-08b9446fc07f",
+    "telegramId": 111444777,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_logs",
+    "createdAt": "2026-07-19T13:19:13.057Z"
   }
 ]

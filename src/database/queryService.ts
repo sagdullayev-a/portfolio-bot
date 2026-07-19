@@ -257,3 +257,42 @@ export async function getLatestUserActivity(userId: string): Promise<ActivityLog
   const logs = await getLogsByUser(userId);
   return logs.length > 0 ? logs[0] : null;
 }
+
+export interface PaginatedLogsResult {
+  logs: ActivityLog[];
+  totalLogs: number;
+  page: number;
+  totalPages: number;
+}
+
+/**
+ * Retrieves a paginated slice of activity logs sorted descending (newest first).
+ */
+export async function getPaginatedLogs(
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedLogsResult> {
+  const allLogs = await getAllLogs();
+  const totalLogs = allLogs.length;
+  const totalPages = Math.max(1, Math.ceil(totalLogs / limit));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+
+  const startIndex = (currentPage - 1) * limit;
+  const pageLogs = allLogs.slice(startIndex, startIndex + limit);
+
+  return {
+    logs: pageLogs,
+    totalLogs,
+    page: currentPage,
+    totalPages,
+  };
+}
+
+/**
+ * Returns total count of activity logs recorded.
+ */
+export async function getLogsCount(): Promise<number> {
+  const logs = await loadActivityLogs();
+  return logs.length;
+}
+

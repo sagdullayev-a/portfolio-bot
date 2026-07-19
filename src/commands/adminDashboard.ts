@@ -20,6 +20,10 @@ import {
   clearSearchSession,
   registerAdminSearchTextHandler,
 } from './adminSearch';
+import {
+  renderGlobalLogsText,
+  getGlobalLogsKeyboard,
+} from './adminLogs';
 
 export const ADMIN_PLACEHOLDER_MESSAGE = '🚧 Bu modul keyingi phaseda quriladi.';
 
@@ -85,7 +89,7 @@ export function getAdminDashboardKeyboard() {
       Markup.button.callback('📈 Statistics', 'admin_stats'),
     ],
     [
-      Markup.button.callback('📜 Timeline', 'admin_timeline'),
+      Markup.button.callback('📜 Timeline', 'admin_logs'),
       Markup.button.callback('🔍 Search', 'admin_search'),
     ],
     [
@@ -95,7 +99,7 @@ export function getAdminDashboardKeyboard() {
 }
 
 /**
- * Registers /admin command and callback query handlers for Dashboard, Users, Profile, Timeline, and Search.
+ * Registers /admin command and callback query handlers for Dashboard, Users, Profile, Timeline, Logs, and Search.
  */
 export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
   // 1. Register search text listener first so it intercepts active sessions
@@ -128,7 +132,25 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 4. Global Search prompt callback: admin_search
+  // 4. Global Logs Viewer callback: admin_logs, admin_timeline, or admin_logs_page_<page>
+  bot.action(/^(?:admin_logs|admin_timeline)(?:_page_(\d+))?$/, adminAuthMiddleware, async (ctx) => {
+    try {
+      if (ctx.from?.id) clearSearchSession(ctx.from.id);
+      const pageStr = ctx.match[1];
+      const page = pageStr ? parseInt(pageStr, 10) : 1;
+      const { text, page: currPage, totalPages } = await renderGlobalLogsText(page);
+
+      await ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        ...getGlobalLogsKeyboard(currPage, totalPages),
+      });
+      await ctx.answerCbQuery();
+    } catch (err) {
+      console.error('[adminLogs] Error rendering global logs viewer:', err);
+    }
+  });
+
+  // 5. Global Search prompt callback: admin_search
   bot.action('admin_search', adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) startSearchSession(ctx.from.id);
@@ -142,7 +164,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 5. Cancel Search callback: admin_search_cancel
+  // 6. Cancel Search callback: admin_search_cancel
   bot.action('admin_search_cancel', adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -157,7 +179,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 6. Main Users page callback: admin_users or admin_users_page_<page>
+  // 7. Main Users page callback: admin_users or admin_users_page_<page>
   bot.action(/^admin_users(?:_page_(\d+))?$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -175,7 +197,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 7. User Timeline Callbacks: admin_user_timeline_<userId> or admin_timeline_page_<userId>_<page>
+  // 8. Individual User Timeline Callbacks: admin_user_timeline_<userId> or admin_timeline_page_<userId>_<page>
   bot.action(/^admin_user_timeline_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -219,7 +241,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 8. Individual User Profile callback: admin_user_<userId>
+  // 9. Individual User Profile callback: admin_user_<userId>
   bot.action(/^admin_user_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -241,7 +263,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 9. Placeholder for other admin_* callbacks
+  // 10. Placeholder for other admin_* callbacks
   bot.action(/^admin_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       await ctx.answerCbQuery(ADMIN_PLACEHOLDER_MESSAGE, { show_alert: true });
