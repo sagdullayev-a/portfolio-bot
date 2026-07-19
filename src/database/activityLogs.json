@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "6ce858ec-e7fa-41ac-9082-088409094964",
+    "telegramId": 111222333,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_stats",
+    "createdAt": "2026-07-19T12:46:51.176Z"
+  }
+]
