@@ -11,7 +11,7 @@ function escapeHtml(str: string): string {
 
 /**
  * Sends a structured notification to the configured administrator.
- * Contact form notifications use the Modern Minimalist Telegram HTML layout.
+ * Contact form notifications use the compact sequential Telegram HTML layout.
  */
 export async function notifyAdmin(options: NotifyOptions): Promise<void> {
   const { type, title, details } = options;
@@ -40,18 +40,13 @@ export async function notifyAdmin(options: NotifyOptions): Promise<void> {
 
     const formattedMessage = `🌐 <b>PORTFOLIO</b> • <b>Yangi Xabar</b>
 ──────────────────────────
-
-👤 <b>Yuboruvchi:</b> <b>${escapeHtml(name)}</b>
-
+👤 <b>Ismi:</b> <b>${escapeHtml(name)}</b>
 📧 <b>Email:</b> ${emailFormatted}
 💬 <b>Telegram:</b> ${telegramFormatted}
 📱 <b>Telefon:</b> ${phoneFormatted}
 
-──────────────────────────
 📝 <b>Xabar matni:</b>
-
 <blockquote>${escapeHtml(messageContent)}</blockquote>
-──────────────────────────
 
 📅 <i>Vaqt: ${tashkentTime}</i>`;
 
