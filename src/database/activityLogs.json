@@ -26,5 +26,12 @@
     "action": "UNAUTHORIZED",
     "message": "Attempted command/action: admin_user_timeline_d9061adb-edc0-49d8-a282-8857e64bcafc",
     "createdAt": "2026-07-19T12:52:29.766Z"
+  },
+  {
+    "id": "f1b90c13-6b67-42ed-a516-38a8610d30a3",
+    "telegramId": 222333444,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_search",
+    "createdAt": "2026-07-19T12:54:55.383Z"
   }
 ]
