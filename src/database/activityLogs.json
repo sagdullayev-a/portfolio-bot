@@ -12,5 +12,12 @@
     "action": "UNAUTHORIZED",
     "message": "Attempted command/action: admin_users",
     "createdAt": "2026-07-19T12:49:12.149Z"
+  },
+  {
+    "id": "d478f9ad-f3de-4508-a300-647cae781476",
+    "telegramId": 444222111,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_user_acc6fcf8-2f96-4d98-93d0-8c2940b7e7dc",
+    "createdAt": "2026-07-19T12:50:52.671Z"
   }
 ]

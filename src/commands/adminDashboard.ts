@@ -4,8 +4,12 @@ import { getOverview } from '../database';
 import {
   renderUsersPageText,
   getUsersPageKeyboard,
-  USER_PROFILE_PLACEHOLDER,
 } from './adminUsers';
+import {
+  renderUserProfileText,
+  getUserProfileKeyboard,
+  TIMELINE_PLACEHOLDER,
+} from './adminUserProfile';
 
 export const ADMIN_PLACEHOLDER_MESSAGE = '🚧 Bu modul keyingi phaseda quriladi.';
 
@@ -81,7 +85,7 @@ export function getAdminDashboardKeyboard() {
 }
 
 /**
- * Registers /admin command and callback query handlers for Dashboard & Users module.
+ * Registers /admin command and callback query handlers for Dashboard, Users, and User Profile.
  */
 export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
   // 1. /admin command - protected by adminAuthMiddleware
@@ -126,16 +130,37 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 4. Individual User Profile callback: admin_user_<userId>
-  bot.action(/^admin_user_(.+)$/, adminAuthMiddleware, async (ctx) => {
+  // 4. User Timeline Callback: admin_user_timeline_<userId>
+  bot.action(/^admin_user_timeline_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
-      await ctx.answerCbQuery(USER_PROFILE_PLACEHOLDER, { show_alert: true });
+      await ctx.answerCbQuery(TIMELINE_PLACEHOLDER, { show_alert: true });
     } catch (err) {
-      console.error('[adminUsers] Error answering user profile callback:', err);
+      console.error('[adminUserProfile] Error answering timeline callback:', err);
     }
   });
 
-  // 5. Placeholder for other admin_* callbacks
+  // 5. Individual User Profile callback: admin_user_<userId>
+  bot.action(/^admin_user_(.+)$/, adminAuthMiddleware, async (ctx) => {
+    try {
+      const userId = ctx.match[1];
+      const profileText = await renderUserProfileText(userId);
+
+      if (!profileText) {
+        await ctx.answerCbQuery('⚠️ User not found', { show_alert: true });
+        return;
+      }
+
+      await ctx.editMessageText(profileText, {
+        parse_mode: 'HTML',
+        ...getUserProfileKeyboard(userId),
+      });
+      await ctx.answerCbQuery();
+    } catch (err) {
+      console.error('[adminUserProfile] Error rendering user profile:', err);
+    }
+  });
+
+  // 6. Placeholder for other admin_* callbacks
   bot.action(/^admin_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       await ctx.answerCbQuery(ADMIN_PLACEHOLDER_MESSAGE, { show_alert: true });
