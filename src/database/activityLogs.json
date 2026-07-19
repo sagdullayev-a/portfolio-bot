@@ -5,5 +5,12 @@
     "action": "UNAUTHORIZED",
     "message": "Attempted command/action: admin_stats",
     "createdAt": "2026-07-19T12:46:51.176Z"
+  },
+  {
+    "id": "86332bd5-cef0-4170-aca5-eb4f829f8f40",
+    "telegramId": 333444555,
+    "action": "UNAUTHORIZED",
+    "message": "Attempted command/action: admin_users",
+    "createdAt": "2026-07-19T12:49:12.149Z"
   }
 ]
