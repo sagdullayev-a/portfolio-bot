@@ -14,6 +14,9 @@ app.use(express.json());
 const allowedOrigins: string[] = [
   env.PORTFOLIO_WEBSITE_URL,
   env.PORTFOLIO_WEBSITE_URL.replace('https://', 'https://www.'),
+  'https://sagdullayev.uz',
+  'https://www.sagdullayev.uz',
+  'https://portfolio-cv-ebon.vercel.app',
 ];
 
 app.use(
@@ -23,16 +26,24 @@ app.use(
       if (!origin) {
         return callback(null, true);
       }
-      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+
+      // Check explicit allowed origins or any *.vercel.app domain
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        /\.vercel\.app$/.test(new URL(origin).hostname)
+      ) {
         return callback(null, true);
       }
-      // Allow any localhost port in development
+
+      // Allow any localhost / 127.0.0.1 origin during development
       if (env.NODE_ENV !== 'production') {
         const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
         if (isLocalhost) {
           return callback(null, true);
         }
       }
+
       return callback(new Error(`CORS: origin "${origin}" is not allowed`));
     },
     methods: ['GET', 'POST', 'OPTIONS'],
