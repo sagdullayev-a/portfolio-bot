@@ -19,8 +19,10 @@ export {
   getLanguageStatistics,
   getDailyStatistics,
   getActiveUsersTodayCount,
+  getDatabaseInfoStatistics,
   OverviewStatistics,
   DailyStatistics,
   ActionStatistics,
   LanguageStatistics,
+  DatabaseInfoStatistics,
 } from './statisticsService';
