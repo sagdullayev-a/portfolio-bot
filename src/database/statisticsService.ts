@@ -245,3 +245,37 @@ export async function getDailyStatistics(): Promise<DailyStatistics> {
     logsToday: logsToday.length,
   };
 }
+
+export interface DatabaseInfoStatistics {
+  usersCount: number;
+  logsCount: number;
+  storageType: string;
+  maxLogs: number;
+  newestLogDate: string;
+  oldestLogDate: string;
+}
+
+/**
+ * Returns database status & storage statistics using Query Engine.
+ */
+export async function getDatabaseInfoStatistics(): Promise<DatabaseInfoStatistics> {
+  const [users, logs] = await Promise.all([getAllUsers(), getAllLogs()]);
+
+  let newestLogDate = 'N/A';
+  let oldestLogDate = 'N/A';
+
+  if (logs.length > 0) {
+    newestLogDate = logs[0].createdAt;
+    oldestLogDate = logs[logs.length - 1].createdAt;
+  }
+
+  return {
+    usersCount: users.length,
+    logsCount: logs.length,
+    storageType: 'Atomic JSON Engine',
+    maxLogs: 50000,
+    newestLogDate,
+    oldestLogDate,
+  };
+}
+

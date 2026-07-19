@@ -24,6 +24,10 @@ import {
   renderGlobalLogsText,
   getGlobalLogsKeyboard,
 } from './adminLogs';
+import {
+  renderAdminStatisticsText,
+  getAdminStatisticsKeyboard,
+} from './adminStatistics';
 
 export const ADMIN_PLACEHOLDER_MESSAGE = '🚧 Bu modul keyingi phaseda quriladi.';
 
@@ -99,7 +103,7 @@ export function getAdminDashboardKeyboard() {
 }
 
 /**
- * Registers /admin command and callback query handlers for Dashboard, Users, Profile, Timeline, Logs, and Search.
+ * Registers /admin command and callback query handlers for Dashboard, Users, Profile, Timeline, Logs, Search, and Statistics.
  */
 export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
   // 1. Register search text listener first so it intercepts active sessions
@@ -132,7 +136,22 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 4. Global Logs Viewer callback: admin_logs, admin_timeline, or admin_logs_page_<page>
+  // 4. Admin Statistics Page callbacks: admin_stats, admin_statistics, admin_statistics_refresh
+  bot.action(/^(?:admin_stats|admin_statistics|admin_statistics_refresh)$/, adminAuthMiddleware, async (ctx) => {
+    try {
+      if (ctx.from?.id) clearSearchSession(ctx.from.id);
+      const text = await renderAdminStatisticsText();
+      await ctx.editMessageText(text, {
+        parse_mode: 'HTML',
+        ...getAdminStatisticsKeyboard(),
+      });
+      await ctx.answerCbQuery(ctx.match[0] === 'admin_statistics_refresh' ? 'Statistika yangilandi 🔄' : undefined);
+    } catch (err) {
+      console.error('[adminStatistics] Error rendering statistics page:', err);
+    }
+  });
+
+  // 5. Global Logs Viewer callback: admin_logs, admin_timeline, or admin_logs_page_<page>
   bot.action(/^(?:admin_logs|admin_timeline)(?:_page_(\d+))?$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -150,7 +169,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 5. Global Search prompt callback: admin_search
+  // 6. Global Search prompt callback: admin_search
   bot.action('admin_search', adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) startSearchSession(ctx.from.id);
@@ -164,7 +183,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 6. Cancel Search callback: admin_search_cancel
+  // 7. Cancel Search callback: admin_search_cancel
   bot.action('admin_search_cancel', adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -179,7 +198,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 7. Main Users page callback: admin_users or admin_users_page_<page>
+  // 8. Main Users page callback: admin_users or admin_users_page_<page>
   bot.action(/^admin_users(?:_page_(\d+))?$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -197,7 +216,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 8. Individual User Timeline Callbacks: admin_user_timeline_<userId> or admin_timeline_page_<userId>_<page>
+  // 9. Individual User Timeline Callbacks: admin_user_timeline_<userId> or admin_timeline_page_<userId>_<page>
   bot.action(/^admin_user_timeline_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -241,7 +260,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 9. Individual User Profile callback: admin_user_<userId>
+  // 10. Individual User Profile callback: admin_user_<userId>
   bot.action(/^admin_user_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       if (ctx.from?.id) clearSearchSession(ctx.from.id);
@@ -263,7 +282,7 @@ export function registerAdminDashboardCommand(bot: Telegraf<Context>): void {
     }
   });
 
-  // 10. Placeholder for other admin_* callbacks
+  // 11. Placeholder for other admin_* callbacks
   bot.action(/^admin_(.+)$/, adminAuthMiddleware, async (ctx) => {
     try {
       await ctx.answerCbQuery(ADMIN_PLACEHOLDER_MESSAGE, { show_alert: true });
