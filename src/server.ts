@@ -147,7 +147,15 @@ app.post('/chat', chatLimiter, async (req, res) => {
   }
 });
 
-// ── Health check (useful for uptime monitors) ─────────────────────────────────
+// ── Root endpoint & Health check (useful for uptime monitors) ───────────────
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    service: 'portfolio-bot',
+    message: 'Portfolio Bot API is running.',
+  });
+});
+
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
